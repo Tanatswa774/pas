@@ -1,0 +1,41 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-image: url("rok_logo.png"); /* Make sure the image file is correctly placed */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  font-family: Arial, sans-serif;
+}
+
+.App {
+  text-align: center;
+  margin-top: 50px;
+  font-family: Arial, sans-serif;
+  background-color: rgba(0, 0, 0, 0.6); /* Dark overlay for readability */
+  padding: 40px;
+  border-radius: 10px;
+  color: white;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+input {
+  padding: 10px;
+  width: 250px;
+  font-size: 16px;
+}
+
+button {
+  padding: 10px 30px;
+  font-size: 16px;
+  margin: 5px;
+  cursor: pointer;
+}
+
+p {
+  margin-top: 20px;
+  font-size: 18px;
+}
