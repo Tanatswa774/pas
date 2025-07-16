@@ -1,31 +1,47 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { io } from 'socket.io-client';
 import './App.css';
 
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const socket = io(API_BASE, { transports: ['websocket', 'polling'] });
 
 function LogsViewer() {
   const [logs, setLogs] = useState("");
-
-  const fetchLogs = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/logs`);
-      const data = await res.json();
-      setLogs(data.logs);
-    } catch (error) {
-      setLogs(`Error fetching logs: ${error.message}`);
-    }
-  };
+  const logsRef = useRef(null);
 
   useEffect(() => {
-    fetchLogs();
-    const interval = setInterval(fetchLogs, 2000); // Fetch logs every 2 seconds
-    return () => clearInterval(interval);
+    // Fetch initial logs on mount
+    fetch(`${API_BASE}/logs`)
+      .then(res => res.json())
+      .then(data => setLogs(data.logs || ""));
+
+    // Socket event handlers
+    socket.on('connect', () => console.log('Socket connected'));
+    socket.on('disconnect', () => console.log('Socket disconnected'));
+    socket.on('log_update', (data) => {
+      setLogs(prevLogs => prevLogs ? prevLogs + "\n" + data.log : data.log);
+    });
+
+    // Cleanup on unmount
+    return () => {
+      socket.off('connect');
+      socket.off('disconnect');
+      socket.off('log_update');
+    };
   }, []);
+
+  // Scroll textarea to bottom when logs change
+  useEffect(() => {
+    if (logsRef.current) {
+      logsRef.current.scrollTop = logsRef.current.scrollHeight;
+    }
+  }, [logs]);
 
   return (
     <div style={{ marginTop: "2rem" }}>
-      <h2>Server Logs</h2>
+      <h2>Server Logs (Live)</h2>
       <textarea
+        ref={logsRef}
         value={logs}
         readOnly
         style={{
@@ -66,6 +82,9 @@ function App() {
       const result = await response.json();
       if (response.ok) {
         setStatus(`✅ ${result.status}`);
+        // Optionally clear inputs
+        // setEmail('');
+        // setPassword('');
       } else {
         setStatus(`❌ Error: ${result.error}`);
       }
@@ -135,10 +154,11 @@ function App() {
       />
       <br /><br />
 
-      <button onClick={handleStart}>Start Bot</button>
+      <button type="button" onClick={handleStart}>Start Bot</button>
       <br /><br />
 
       <button
+        type="button"
         onClick={handleStop}
         style={{ backgroundColor: '#f44336', color: 'white' }}
       >
@@ -148,7 +168,6 @@ function App() {
       <p>{status}</p>
       <p><strong>Gem Status:</strong> {gemStatus}</p>
 
-      {/* Logs viewer here */}
       <LogsViewer />
     </div>
   );
