@@ -2,11 +2,14 @@ body {
   margin: 0;
   padding: 0;
   background-image: url("rok_logo.png"); /* Make sure the image file is correctly placed */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  background-size: cover;               /* Scale to cover entire viewport */
+  background-position: center center;  /* Center the image */
+  background-repeat: no-repeat;         /* No repeating */
+  background-attachment: fixed;         /* Fixed during scroll */
   font-family: Arial, sans-serif;
+  height: 100vh;                        /* Full viewport height */
+  width: 100vw;                         /* Full viewport width */
+  overflow-x: hidden;                   /* Prevent horizontal scroll */
 }
 
 .App {
