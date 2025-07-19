@@ -8,16 +8,32 @@ function LogsViewer() {
   const logsRef = useRef(null);
 
   useEffect(() => {
-    const interval = setInterval(async () => {
+    const fetchLogs = async () => {
       try {
-        const res = await fetch(`${API_BASE}/logs`);
+        const res = await fetch(`${API_BASE}/logs`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          mode: 'cors'
+        });
+        
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        
         const data = await res.json();
-        setLogs(data.logs || "No logs.");
+        setLogs(data.logs || "No logs available.");
       } catch (err) {
-        setLogs("❌ Error fetching logs.");
+        console.error('Logs fetch error:', err);
+        setLogs("❌ Error fetching logs. Trying again...");
       }
-    }, 3000);
+    };
 
+    // Immediate first fetch
+    fetchLogs();
+    
+    // Then set up interval
+    const interval = setInterval(fetchLogs, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -42,6 +58,7 @@ function LogsViewer() {
           overflowY: "scroll",
           border: "1px solid #ccc",
           padding: "0.5rem",
+          backgroundColor: "#f8f8f8"
         }}
       />
     </div>
@@ -67,8 +84,12 @@ function App() {
     try {
       const response = await fetch(`${API_BASE}/start`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ email, password }),
+        mode: 'cors'
       });
 
       const result = await response.json();
@@ -78,7 +99,7 @@ function App() {
         setStatus(`❌ Error: ${result.error}`);
       }
     } catch (err) {
-      console.error("Fetch error:", err);
+      console.error("Start error:", err);
       setStatus("❌ Could not connect to backend.");
     } finally {
       setLoading(false);
@@ -91,7 +112,12 @@ function App() {
 
     try {
       const response = await fetch(`${API_BASE}/stop`, {
-        method: 'POST'
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors'
       });
 
       const result = await response.json();
@@ -114,16 +140,29 @@ function App() {
   };
 
   useEffect(() => {
-    const interval = setInterval(async () => {
+    const checkStatus = async () => {
       try {
-        const response = await fetch(`${API_BASE}/status`);
-        const result = await response.json();
-        setGemStatus(result.gem_found ? "💎 Gem found!" : "🔍 No gem yet.");
+        const response = await fetch(`${API_BASE}/status`, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          mode: 'cors'
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          setGemStatus(result.gem_found ? "💎 Gem found!" : "🔍 No gem yet.");
+        }
       } catch (err) {
+        console.error("Status check error:", err);
         setGemStatus("⚠️ Error checking gem status.");
       }
-    }, 5000);
+    };
 
+    // Immediate first check
+    checkStatus();
+    
+    // Then set up interval
+    const interval = setInterval(checkStatus, 5000);
     return () => clearInterval(interval);
   }, []);
 
