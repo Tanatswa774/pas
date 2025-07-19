@@ -3,7 +3,6 @@ import './App.css';
 
 const API_BASE = "https://b14527d1e5d9.ngrok-free.app";
 
-
 function LogsViewer() {
   const [logs, setLogs] = useState("");
   const logsRef = useRef(null);
@@ -11,7 +10,11 @@ function LogsViewer() {
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${API_BASE}/logs`);
+        const res = await fetch(`${API_BASE}/logs`, {
+          headers: {
+            "ngrok-skip-browser-warning": "true"
+          }
+        });
         if (!res.ok) throw new Error(`Status ${res.status}`);
         const data = await res.json();
         setLogs(data.logs || "No logs.");
@@ -70,7 +73,10 @@ function App() {
     try {
       const response = await fetch(`${API_BASE}/start`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
+        },
         body: JSON.stringify({ email, password })
       });
 
@@ -94,7 +100,10 @@ function App() {
 
     try {
       const response = await fetch(`${API_BASE}/stop`, {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
       });
 
       const result = await response.json();
@@ -119,7 +128,11 @@ function App() {
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const response = await fetch(`${API_BASE}/status`);
+        const response = await fetch(`${API_BASE}/status`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        });
         const result = await response.json();
         setGemStatus(result.gem_found ? "💎 Gem found!" : "🔍 No gem yet.");
       } catch (err) {
