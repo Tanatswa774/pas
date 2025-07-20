@@ -4,7 +4,7 @@ import './App.css';
 const API_BASE = "https://b14527d1e5d9.ngrok-free.app";
 
 // 🔒 Hardcoded allowed usernames
-const ALLOWED_USERS = ["odinrise12", "bob", "charlie"]; // 👈 You can add/remove usernames here
+const ALLOWED_USERS = ["alice", "bob", "charlie"]; // 👈 Add more here
 const STORAGE_KEY = "rokbot_active_user";
 
 function LogsViewer() {
@@ -70,23 +70,27 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Check if user is already logged in
-    const activeUser = localStorage.getItem(STORAGE_KEY);
-    if (activeUser && ALLOWED_USERS.includes(activeUser)) {
-      setUsername(activeUser);
+    const storedUser = localStorage.getItem(STORAGE_KEY);
+    const activeUsers = JSON.parse(localStorage.getItem("active_users") || "{}");
+
+    if (storedUser && ALLOWED_USERS.includes(storedUser) && activeUsers[storedUser]) {
+      setUsername(storedUser);
       setAuthenticated(true);
     }
 
-    // Clean up on close
     const handleUnload = () => {
+      const activeUsers = JSON.parse(localStorage.getItem("active_users") || "{}");
       const current = localStorage.getItem(STORAGE_KEY);
-      if (current === username) {
+      if (current && activeUsers[current]) {
+        delete activeUsers[current];
+        localStorage.setItem("active_users", JSON.stringify(activeUsers));
         localStorage.removeItem(STORAGE_KEY);
       }
     };
+
     window.addEventListener("beforeunload", handleUnload);
     return () => window.removeEventListener("beforeunload", handleUnload);
-  }, [username]);
+  }, []);
 
   const handleLogin = () => {
     const name = username.trim().toLowerCase();
@@ -100,20 +104,31 @@ function App() {
       return;
     }
 
-    const activeUser = localStorage.getItem(STORAGE_KEY);
-    if (activeUser && activeUser !== name) {
-      setLoginError(`❌ Another user (${activeUser}) is already online.`);
-      return;
-    }
+    const activeUsers = JSON.parse(localStorage.getItem("active_users") || "{}");
 
-    if (activeUser === name) {
+    if (activeUsers[name]) {
       setLoginError("❌ This user is already online.");
       return;
     }
 
+    // Mark user as active
+    activeUsers[name] = true;
+    localStorage.setItem("active_users", JSON.stringify(activeUsers));
     localStorage.setItem(STORAGE_KEY, name);
+
     setAuthenticated(true);
     setLoginError('');
+  };
+
+  const handleLogout = () => {
+    const activeUsers = JSON.parse(localStorage.getItem("active_users") || "{}");
+    if (activeUsers[username]) {
+      delete activeUsers[username];
+      localStorage.setItem("active_users", JSON.stringify(activeUsers));
+    }
+    localStorage.removeItem(STORAGE_KEY);
+    setAuthenticated(false);
+    setUsername('');
   };
 
   const handleStart = async () => {
@@ -181,82 +196,4 @@ function App() {
   };
 
   useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        const response = await fetch(`${API_BASE}/status`, {
-          headers: {
-            'ngrok-skip-browser-warning': 'true'
-          }
-        });
-        const result = await response.json();
-        setGemStatus(result.gem_found ? "💎 Gem found!" : "🔍 No gem yet.");
-      } catch (err) {
-        setGemStatus("⚠️ Error checking gem status.");
-      }
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  if (!authenticated) {
-    return (
-      <div className="App">
-        <h1>Enter Username</h1>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={e => setUsername(e.target.value)}
-        />
-        <br /><br />
-        <button onClick={handleLogin}>Login</button>
-        {loginError && <p style={{ color: "red" }}>{loginError}</p>}
-      </div>
-    );
-  }
-
-  return (
-    <div className="App">
-      <h1>Rise of Kingdoms Bot</h1>
-
-      <input
-        type="email"
-        placeholder="Enter email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        disabled={loading}
-      />
-      <br /><br />
-
-      <input
-        type="password"
-        placeholder="Enter password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        disabled={loading}
-      />
-      <br /><br />
-
-      <button type="button" onClick={handleStart} disabled={loading}>
-        {loading ? "Starting..." : "Start Bot"}
-      </button>
-      <br /><br />
-
-      <button
-        type="button"
-        onClick={handleStop}
-        style={{ backgroundColor: '#f44336', color: 'white' }}
-        disabled={loading}
-      >
-        {loading ? "Stopping..." : "Stop Bot"}
-      </button>
-
-      <p>{status}</p>
-      <p><strong>Gem Status:</strong> {gemStatus}</p>
-
-      <LogsViewer />
-    </div>
-  );
-}
-
-export default App;
+    const interval = setInterva
