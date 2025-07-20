@@ -3,6 +3,10 @@ import './App.css';
 
 const API_BASE = "https://b14527d1e5d9.ngrok-free.app";
 
+// 🔒 Hardcoded allowed usernames
+const ALLOWED_USERS = ["odinrise12", "bob", "charlie"]; // 👈 You can add/remove usernames here
+const STORAGE_KEY = "rokbot_active_user";
+
 function LogsViewer() {
   const [logs, setLogs] = useState("");
   const logsRef = useRef(null);
@@ -55,11 +59,62 @@ function LogsViewer() {
 }
 
 function App() {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [username, setUsername] = useState('');
+  const [loginError, setLoginError] = useState('');
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState('');
   const [gemStatus, setGemStatus] = useState('🔍 Waiting...');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const activeUser = localStorage.getItem(STORAGE_KEY);
+    if (activeUser && ALLOWED_USERS.includes(activeUser)) {
+      setUsername(activeUser);
+      setAuthenticated(true);
+    }
+
+    // Clean up on close
+    const handleUnload = () => {
+      const current = localStorage.getItem(STORAGE_KEY);
+      if (current === username) {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    };
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
+  }, [username]);
+
+  const handleLogin = () => {
+    const name = username.trim().toLowerCase();
+    if (!name) {
+      setLoginError("⚠️ Please enter a username.");
+      return;
+    }
+
+    if (!ALLOWED_USERS.includes(name)) {
+      setLoginError("🚫 Username not allowed.");
+      return;
+    }
+
+    const activeUser = localStorage.getItem(STORAGE_KEY);
+    if (activeUser && activeUser !== name) {
+      setLoginError(`❌ Another user (${activeUser}) is already online.`);
+      return;
+    }
+
+    if (activeUser === name) {
+      setLoginError("❌ This user is already online.");
+      return;
+    }
+
+    localStorage.setItem(STORAGE_KEY, name);
+    setAuthenticated(true);
+    setLoginError('');
+  };
 
   const handleStart = async () => {
     if (!email.trim() || !password.trim()) {
@@ -142,6 +197,23 @@ function App() {
 
     return () => clearInterval(interval);
   }, []);
+
+  if (!authenticated) {
+    return (
+      <div className="App">
+        <h1>Enter Username</h1>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={e => setUsername(e.target.value)}
+        />
+        <br /><br />
+        <button onClick={handleLogin}>Login</button>
+        {loginError && <p style={{ color: "red" }}>{loginError}</p>}
+      </div>
+    );
+  }
 
   return (
     <div className="App">
