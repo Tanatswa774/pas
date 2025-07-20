@@ -4,7 +4,7 @@ import './App.css';
 const API_BASE = "https://b14527d1e5d9.ngrok-free.app";
 
 // 🔒 Hardcoded allowed usernames
-const ALLOWED_USERS = ["alice", "bob", "charlie"]; // 👈 Add more here
+const ALLOWED_USERS = ["ofodin12"]; // 👈 Add more here
 const STORAGE_KEY = "rokbot_active_user";
 
 function LogsViewer() {
