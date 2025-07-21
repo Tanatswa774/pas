@@ -3,6 +3,13 @@ import './App.css';
 
 const API_BASE = "https://b14527d1e5d9.ngrok-free.app";
 
+// 👥 User database (email → password)
+const ALLOWED_USERS = {
+  "admin@example.com": "SuperSecret123",
+  "tester@domain.com": "AnotherSecret456",
+  // Add or remove users here
+};
+
 function LogsViewer() {
   const [logs, setLogs] = useState("");
   const logsRef = useRef(null);
@@ -55,19 +62,20 @@ function LogsViewer() {
 }
 
 function App() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [inputEmail, setInputEmail] = useState('');
   const [status, setStatus] = useState('');
   const [gemStatus, setGemStatus] = useState('🔍 Waiting...');
   const [loading, setLoading] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
 
-  const handleStart = async () => {
-    if (!email.trim() || !password.trim()) {
-      setStatus("⚠️ Please enter both email and password.");
+  const handleLogin = async () => {
+    const password = ALLOWED_USERS[inputEmail.trim()];
+    if (!password) {
+      setStatus("❌ Unauthorized email.");
       return;
     }
 
-    setStatus("⏳ Starting bot...");
+    setStatus("⏳ Authenticating...");
     setLoading(true);
 
     try {
@@ -77,17 +85,18 @@ function App() {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true'
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email: inputEmail.trim(), password })
       });
 
       const result = await response.json();
       if (response.ok) {
         setStatus(`✅ ${result.status}`);
+        setAuthenticated(true);
       } else {
         setStatus(`❌ Error: ${result.error}`);
       }
     } catch (err) {
-      console.error("Fetch error:", err);
+      console.error("Login error:", err);
       setStatus("❌ Could not connect to backend.");
     } finally {
       setLoading(false);
@@ -111,8 +120,6 @@ function App() {
         setStatus("✅ Bot stopped. Restarting server...");
         setTimeout(() => {
           setStatus("🔁 Server should be back shortly.");
-          setEmail('');
-          setPassword('');
         }, 3000);
       } else {
         setStatus(`❌ Error: ${result.error}`);
@@ -126,6 +133,8 @@ function App() {
   };
 
   useEffect(() => {
+    if (!authenticated) return;
+
     const interval = setInterval(async () => {
       try {
         const response = await fetch(`${API_BASE}/status`, {
@@ -141,48 +150,39 @@ function App() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [authenticated]);
 
   return (
     <div className="App">
       <h1>Rise of Kingdoms Bot</h1>
 
-      <input
-        type="email"
-        placeholder="Enter email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        disabled={loading}
-      />
-      <br /><br />
+      {!authenticated ? (
+        <>
+          <input
+            type="email"
+            placeholder="Enter your email"
+            value={inputEmail}
+            onChange={e => setInputEmail(e.target.value)}
+            disabled={loading}
+          />
+          <br /><br />
+          <button type="button" onClick={handleLogin} disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
+          <p>{status}</p>
+        </>
+      ) : (
+        <>
+          <button type="button" onClick={handleStop} style={{ backgroundColor: '#f44336', color: 'white' }} disabled={loading}>
+            {loading ? "Stopping..." : "Stop Bot"}
+          </button>
 
-      <input
-        type="password"
-        placeholder="Enter password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        disabled={loading}
-      />
-      <br /><br />
+          <p>{status}</p>
+          <p><strong>Gem Status:</strong> {gemStatus}</p>
 
-      <button type="button" onClick={handleStart} disabled={loading}>
-        {loading ? "Starting..." : "Start Bot"}
-      </button>
-      <br /><br />
-
-      <button
-        type="button"
-        onClick={handleStop}
-        style={{ backgroundColor: '#f44336', color: 'white' }}
-        disabled={loading}
-      >
-        {loading ? "Stopping..." : "Stop Bot"}
-      </button>
-
-      <p>{status}</p>
-      <p><strong>Gem Status:</strong> {gemStatus}</p>
-
-      <LogsViewer />
+          <LogsViewer />
+        </>
+      )}
     </div>
   );
 }
