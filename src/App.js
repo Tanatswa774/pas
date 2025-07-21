@@ -3,10 +3,6 @@ import './App.css';
 
 const API_BASE = "https://b14527d1e5d9.ngrok-free.app";
 
-// 🔒 Hardcoded allowed usernames
-const ALLOWED_USERS = ["ofodin12"]; // 👈 Add more here
-const STORAGE_KEY = "rokbot_active_user";
-
 function LogsViewer() {
   const [logs, setLogs] = useState("");
   const logsRef = useRef(null);
@@ -59,77 +55,11 @@ function LogsViewer() {
 }
 
 function App() {
-  const [authenticated, setAuthenticated] = useState(false);
-  const [username, setUsername] = useState('');
-  const [loginError, setLoginError] = useState('');
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState('');
   const [gemStatus, setGemStatus] = useState('🔍 Waiting...');
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem(STORAGE_KEY);
-    const activeUsers = JSON.parse(localStorage.getItem("active_users") || "{}");
-
-    if (storedUser && ALLOWED_USERS.includes(storedUser) && activeUsers[storedUser]) {
-      setUsername(storedUser);
-      setAuthenticated(true);
-    }
-
-    const handleUnload = () => {
-      const activeUsers = JSON.parse(localStorage.getItem("active_users") || "{}");
-      const current = localStorage.getItem(STORAGE_KEY);
-      if (current && activeUsers[current]) {
-        delete activeUsers[current];
-        localStorage.setItem("active_users", JSON.stringify(activeUsers));
-        localStorage.removeItem(STORAGE_KEY);
-      }
-    };
-
-    window.addEventListener("beforeunload", handleUnload);
-    return () => window.removeEventListener("beforeunload", handleUnload);
-  }, []);
-
-  const handleLogin = () => {
-    const name = username.trim().toLowerCase();
-    if (!name) {
-      setLoginError("⚠️ Please enter a username.");
-      return;
-    }
-
-    if (!ALLOWED_USERS.includes(name)) {
-      setLoginError("🚫 Username not allowed.");
-      return;
-    }
-
-    const activeUsers = JSON.parse(localStorage.getItem("active_users") || "{}");
-
-    if (activeUsers[name]) {
-      setLoginError("❌ This user is already online.");
-      return;
-    }
-
-    // Mark user as active
-    activeUsers[name] = true;
-    localStorage.setItem("active_users", JSON.stringify(activeUsers));
-    localStorage.setItem(STORAGE_KEY, name);
-
-    setAuthenticated(true);
-    setLoginError('');
-  };
-
-  const handleLogout = () => {
-    const activeUsers = JSON.parse(localStorage.getItem("active_users") || "{}");
-    if (activeUsers[username]) {
-      delete activeUsers[username];
-      localStorage.setItem("active_users", JSON.stringify(activeUsers));
-    }
-    localStorage.removeItem(STORAGE_KEY);
-    setAuthenticated(false);
-    setUsername('');
-  };
 
   const handleStart = async () => {
     if (!email.trim() || !password.trim()) {
@@ -196,4 +126,65 @@ function App() {
   };
 
   useEffect(() => {
-    const interval = setInterva
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(`${API_BASE}/status`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        });
+        const result = await response.json();
+        setGemStatus(result.gem_found ? "💎 Gem found!" : "🔍 No gem yet.");
+      } catch (err) {
+        setGemStatus("⚠️ Error checking gem status.");
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="App">
+      <h1>Rise of Kingdoms Bot</h1>
+
+      <input
+        type="email"
+        placeholder="Enter email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        disabled={loading}
+      />
+      <br /><br />
+
+      <input
+        type="password"
+        placeholder="Enter password"
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+        disabled={loading}
+      />
+      <br /><br />
+
+      <button type="button" onClick={handleStart} disabled={loading}>
+        {loading ? "Starting..." : "Start Bot"}
+      </button>
+      <br /><br />
+
+      <button
+        type="button"
+        onClick={handleStop}
+        style={{ backgroundColor: '#f44336', color: 'white' }}
+        disabled={loading}
+      >
+        {loading ? "Stopping..." : "Stop Bot"}
+      </button>
+
+      <p>{status}</p>
+      <p><strong>Gem Status:</strong> {gemStatus}</p>
+
+      <LogsViewer />
+    </div>
+  );
+}
+
+export default App;
