@@ -10,11 +10,16 @@ const ALLOWED_USERS = {
   // Add/remove users here
 };
 
-function LogsViewer() {
-  const [logs, setLogs] = useState("");
+function LogsViewer({ botStarted }) {
+  const [logs, setLogs] = useState("Bot is not running. Press Start Bot to start it.");
   const logsRef = useRef(null);
 
   useEffect(() => {
+    if (!botStarted) {
+      setLogs("Bot is not running. Press Start Bot to start it.");
+      return;
+    }
+
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`${API_BASE}/logs`, {
@@ -32,7 +37,7 @@ function LogsViewer() {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [botStarted]);
 
   useEffect(() => {
     if (logsRef.current) {
@@ -68,6 +73,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [userPassword, setUserPassword] = useState('');
+  const [botStarted, setBotStarted] = useState(false); // NEW
 
   const handleLogin = () => {
     const password = ALLOWED_USERS[inputEmail.trim()];
@@ -98,6 +104,7 @@ function App() {
       const result = await response.json();
       if (response.ok) {
         setStatus(`✅ ${result.status}`);
+        setBotStarted(true); // START LOGGING
       } else {
         setStatus(`❌ Error: ${result.error}`);
       }
@@ -124,6 +131,7 @@ function App() {
       const result = await response.json();
       if (response.ok) {
         setStatus("✅ Bot stopped. Restarting server...");
+        setBotStarted(false); // STOP LOGGING
         setTimeout(() => {
           setStatus("🔁 Server should be back shortly.");
         }, 3000);
@@ -195,7 +203,7 @@ function App() {
           <p>{status}</p>
           <p><strong>Gem Status:</strong> {gemStatus}</p>
 
-          <LogsViewer />
+          <LogsViewer botStarted={botStarted} />
         </>
       )}
     </div>
