@@ -3,11 +3,11 @@ import './App.css';
 
 const API_BASE = "https://b14527d1e5d9.ngrok-free.app";
 
-// 👥 User database (email → password)
+// 👥 Hardcoded users (email → password)
 const ALLOWED_USERS = {
   "ofodinrise@gmail.com": "RiseOdin1234@",
   "tester@domain.com": "AnotherSecret456",
-  // Add or remove users here
+  // Add/remove users here
 };
 
 function LogsViewer() {
@@ -67,15 +67,22 @@ function App() {
   const [gemStatus, setGemStatus] = useState('🔍 Waiting...');
   const [loading, setLoading] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
+  const [userPassword, setUserPassword] = useState('');
 
-  const handleLogin = async () => {
+  const handleLogin = () => {
     const password = ALLOWED_USERS[inputEmail.trim()];
     if (!password) {
       setStatus("❌ Unauthorized email.");
       return;
     }
 
-    setStatus("⏳ Authenticating...");
+    setStatus("✅ Access granted.");
+    setAuthenticated(true);
+    setUserPassword(password);
+  };
+
+  const handleStart = async () => {
+    setStatus("⏳ Starting bot...");
     setLoading(true);
 
     try {
@@ -85,18 +92,17 @@ function App() {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true'
         },
-        body: JSON.stringify({ email: inputEmail.trim(), password })
+        body: JSON.stringify({ email: inputEmail.trim(), password: userPassword })
       });
 
       const result = await response.json();
       if (response.ok) {
         setStatus(`✅ ${result.status}`);
-        setAuthenticated(true);
       } else {
         setStatus(`❌ Error: ${result.error}`);
       }
     } catch (err) {
-      console.error("Login error:", err);
+      console.error("Start error:", err);
       setStatus("❌ Could not connect to backend.");
     } finally {
       setLoading(false);
@@ -167,13 +173,22 @@ function App() {
           />
           <br /><br />
           <button type="button" onClick={handleLogin} disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Checking..." : "Login"}
           </button>
           <p>{status}</p>
         </>
       ) : (
         <>
-          <button type="button" onClick={handleStop} style={{ backgroundColor: '#f44336', color: 'white' }} disabled={loading}>
+          <button type="button" onClick={handleStart} disabled={loading}>
+            {loading ? "Starting..." : "Start Bot"}
+          </button>
+          <br /><br />
+          <button
+            type="button"
+            onClick={handleStop}
+            style={{ backgroundColor: '#f44336', color: 'white' }}
+            disabled={loading}
+          >
             {loading ? "Stopping..." : "Stop Bot"}
           </button>
 
