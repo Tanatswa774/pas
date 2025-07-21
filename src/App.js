@@ -5,7 +5,7 @@ const API_BASE = "https://b14527d1e5d9.ngrok-free.app";
 
 // 👥 User database (email → password)
 const ALLOWED_USERS = {
-  "admin@example.com": "SuperSecret123",
+  "ofodinrise@gmail.com": "RiseOdin1234@",
   "tester@domain.com": "AnotherSecret456",
   // Add or remove users here
 };
