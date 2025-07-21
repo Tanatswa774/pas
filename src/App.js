@@ -169,7 +169,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Rise of Kingdoms Bot</h1>
+      <h1>Gem Collector Bot</h1>
 
       {!authenticated ? (
         <>
