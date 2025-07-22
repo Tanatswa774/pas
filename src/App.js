@@ -6,7 +6,7 @@ const API_BASE = "https://b14527d1e5d9.ngrok-free.app"; // Your backend API
 const ALLOWED_USERS = {
   "ofodinrise@gmail.com": "RiseOdin1234@",
   "tester@domain.com": "AnotherSecret456",
-  "vergasovdaniel@gmail.com": "general2330",
+  "vergasovdaniel@gmail.com": "generals2330",
 };
 
 function LogsViewer({ botStarted, email, onLogout }) {
