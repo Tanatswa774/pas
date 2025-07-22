@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
-const API_BASE = "https://b14527d1e5d9.ngrok-free.app"; // Replace with your current server address
+const API_BASE = "https://b14527d1e5d9.ngrok-free.app"; // Your backend API
 
 const ALLOWED_USERS = {
   "ofodinrise@gmail.com": "RiseOdin1234@",
@@ -9,7 +9,7 @@ const ALLOWED_USERS = {
   "vergasovdaniel@gmail.com": "general2330",
 };
 
-function LogsViewer({ botStarted }) {
+function LogsViewer({ botStarted, email }) {
   const [logs, setLogs] = useState("Bot is not running. Press Start Bot to start it.");
   const logsRef = useRef(null);
 
@@ -21,7 +21,7 @@ function LogsViewer({ botStarted }) {
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${API_BASE}/logs`, {
+        const res = await fetch(`${API_BASE}/logs?email=${encodeURIComponent(email)}`, {
           headers: {
             "ngrok-skip-browser-warning": "true"
           }
@@ -36,7 +36,7 @@ function LogsViewer({ botStarted }) {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [botStarted]);
+  }, [botStarted, email]);
 
   useEffect(() => {
     if (logsRef.current) {
@@ -150,7 +150,7 @@ function App() {
 
     const interval = setInterval(async () => {
       try {
-        const response = await fetch(`${API_BASE}/status`, {
+        const response = await fetch(`${API_BASE}/status?email=${encodeURIComponent(inputEmail.trim())}`, {
           headers: {
             'ngrok-skip-browser-warning': 'true'
           }
@@ -163,10 +163,12 @@ function App() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [authenticated]);
+  }, [authenticated, inputEmail]);
 
   return (
     <>
+      <div className="background-logo"></div>
+
       <div className="App">
         <h1>Gem Collector Bot</h1>
 
@@ -203,7 +205,7 @@ function App() {
             <p>{status}</p>
             <p><strong>Gem Status:</strong> {gemStatus}</p>
 
-            <LogsViewer botStarted={botStarted} />
+            <LogsViewer botStarted={botStarted} email={inputEmail.trim()} />
           </>
         )}
       </div>
