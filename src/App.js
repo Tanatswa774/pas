@@ -9,7 +9,7 @@ const ALLOWED_USERS = {
   "vergasovdaniel@gmail.com": "general2330",
 };
 
-function LogsViewer({ botStarted, email }) {
+function LogsViewer({ botStarted, email, onLogout }) {
   const [logs, setLogs] = useState("Bot is not running. Press Start Bot to start it.");
   const logsRef = useRef(null);
 
@@ -46,7 +46,23 @@ function LogsViewer({ botStarted, email }) {
 
   return (
     <div style={{ marginTop: "2rem" }}>
-      <h2>Server Logs (Live)</h2>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <h2 style={{ margin: 0 }}>Server Logs (Live)</h2>
+        <button
+          onClick={onLogout}
+          style={{
+            padding: "0.3rem 0.6rem",
+            fontSize: "0.9rem",
+            cursor: "pointer",
+            backgroundColor: "#f44336",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+          }}
+        >
+          Logout
+        </button>
+      </div>
       <textarea
         ref={logsRef}
         value={logs}
@@ -59,6 +75,7 @@ function LogsViewer({ botStarted, email }) {
           overflowY: "scroll",
           border: "1px solid #ccc",
           padding: "0.5rem",
+          marginTop: "0.5rem",
         }}
       />
     </div>
@@ -145,6 +162,15 @@ function App() {
     }
   };
 
+  const handleLogout = () => {
+    setAuthenticated(false);
+    setInputEmail('');
+    setUserPassword('');
+    setBotStarted(false);
+    setStatus('');
+    setGemStatus('🔍 Waiting...');
+  };
+
   useEffect(() => {
     if (!authenticated) return;
 
@@ -205,7 +231,11 @@ function App() {
             <p>{status}</p>
             <p><strong>Gem Status:</strong> {gemStatus}</p>
 
-            <LogsViewer botStarted={botStarted} email={inputEmail.trim()} />
+            <LogsViewer
+              botStarted={botStarted}
+              email={inputEmail.trim()}
+              onLogout={handleLogout}
+            />
           </>
         )}
       </div>
