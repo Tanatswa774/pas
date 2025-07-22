@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
-import logo from './rok_logo.png'; // Background logo
 
-const API_BASE = "https://b14527d1e5d9.ngrok-free.app";
+const API_BASE = "https://b14527d1e5d9.ngrok-free.app"; // Replace with your current server address
 
 const ALLOWED_USERS = {
   "ofodinrise@gmail.com": "RiseOdin1234@",
@@ -10,7 +9,7 @@ const ALLOWED_USERS = {
   "vergasovdaniel@gmail.com": "general2330",
 };
 
-function LogsViewer({ botStarted, email }) {
+function LogsViewer({ botStarted }) {
   const [logs, setLogs] = useState("Bot is not running. Press Start Bot to start it.");
   const logsRef = useRef(null);
 
@@ -22,8 +21,10 @@ function LogsViewer({ botStarted, email }) {
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${API_BASE}/logs?email=${email}`, {
-          headers: { "ngrok-skip-browser-warning": "true" }
+        const res = await fetch(`${API_BASE}/logs`, {
+          headers: {
+            "ngrok-skip-browser-warning": "true"
+          }
         });
         if (!res.ok) throw new Error(`Status ${res.status}`);
         const data = await res.json();
@@ -35,7 +36,7 @@ function LogsViewer({ botStarted, email }) {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [botStarted, email]);
+  }, [botStarted]);
 
   useEffect(() => {
     if (logsRef.current) {
@@ -122,10 +123,8 @@ function App() {
       const response = await fetch(`${API_BASE}/stop`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true'
-        },
-        body: JSON.stringify({ email: inputEmail.trim() })
+        }
       });
 
       const result = await response.json();
@@ -151,8 +150,10 @@ function App() {
 
     const interval = setInterval(async () => {
       try {
-        const response = await fetch(`${API_BASE}/status?email=${inputEmail.trim()}`, {
-          headers: { 'ngrok-skip-browser-warning': 'true' }
+        const response = await fetch(`${API_BASE}/status`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
         });
         const result = await response.json();
         setGemStatus(result.gem_found ? "💎 Gem found!" : "🔍 No gem yet.");
@@ -162,12 +163,10 @@ function App() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [authenticated, inputEmail]);
+  }, [authenticated]);
 
   return (
     <>
-      <div className="background-logo"></div>
-
       <div className="App">
         <h1>Gem Collector Bot</h1>
 
@@ -204,7 +203,7 @@ function App() {
             <p>{status}</p>
             <p><strong>Gem Status:</strong> {gemStatus}</p>
 
-            <LogsViewer botStarted={botStarted} email={inputEmail.trim()} />
+            <LogsViewer botStarted={botStarted} />
           </>
         )}
       </div>
