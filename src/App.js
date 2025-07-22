@@ -111,7 +111,7 @@ function App() {
       }
     } catch (err) {
       console.error("Start error:", err);
-      setStatus("❌ Could not connect to backend.");
+      setStatus("❌ COULD NOT CONNECT.");
     } finally {
       setLoading(false);
     }
@@ -141,7 +141,7 @@ function App() {
       }
     } catch (err) {
       console.error("Stop error:", err);
-      setStatus("❌ Could not connect to backend. It may be restarting.");
+      setStatus("❌ STOPPING THE BOT.");
     } finally {
       setLoading(false);
     }
