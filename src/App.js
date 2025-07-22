@@ -3,15 +3,13 @@ import './App.css';
 
 const API_BASE = "https://b14527d1e5d9.ngrok-free.app";
 
-// 👥 Hardcoded users (email → password)
 const ALLOWED_USERS = {
   "ofodinrise@gmail.com": "RiseOdin1234@",
   "tester@domain.com": "AnotherSecret456",
   "vergasovdaniel@gmail.com": "general2330",
-  // Add/remove users here
 };
 
-function LogsViewer({ botStarted }) {
+function LogsViewer({ botStarted, onLogout }) {
   const [logs, setLogs] = useState("Bot is not running. Press Start Bot to start it.");
   const logsRef = useRef(null);
 
@@ -48,7 +46,12 @@ function LogsViewer({ botStarted }) {
 
   return (
     <div style={{ marginTop: "2rem" }}>
-      <h2>Server Logs (Live)</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2>Server Logs (Live)</h2>
+        <button onClick={onLogout} style={{ backgroundColor: '#888', color: 'white', padding: '0.5rem 1rem', border: 'none', borderRadius: '4px' }}>
+          Logout
+        </button>
+      </div>
       <textarea
         ref={logsRef}
         value={logs}
@@ -74,7 +77,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [userPassword, setUserPassword] = useState('');
-  const [botStarted, setBotStarted] = useState(false); // NEW
+  const [botStarted, setBotStarted] = useState(false);
 
   const handleLogin = () => {
     const password = ALLOWED_USERS[inputEmail.trim()];
@@ -86,6 +89,15 @@ function App() {
     setStatus("✅ Access granted.");
     setAuthenticated(true);
     setUserPassword(password);
+  };
+
+  const handleLogout = () => {
+    setAuthenticated(false);
+    setInputEmail('');
+    setUserPassword('');
+    setStatus('');
+    setGemStatus('🔍 Waiting...');
+    setBotStarted(false);
   };
 
   const handleStart = async () => {
@@ -105,7 +117,7 @@ function App() {
       const result = await response.json();
       if (response.ok) {
         setStatus(`✅ ${result.status}`);
-        setBotStarted(true); // START LOGGING
+        setBotStarted(true);
       } else {
         setStatus(`❌ Error: ${result.error}`);
       }
@@ -132,7 +144,7 @@ function App() {
       const result = await response.json();
       if (response.ok) {
         setStatus("✅ Bot stopped. Restarting server...");
-        setBotStarted(false); // STOP LOGGING
+        setBotStarted(false);
         setTimeout(() => {
           setStatus("🔁 Server should be back shortly.");
         }, 3000);
@@ -204,7 +216,7 @@ function App() {
           <p>{status}</p>
           <p><strong>Gem Status:</strong> {gemStatus}</p>
 
-          <LogsViewer botStarted={botStarted} />
+          <LogsViewer botStarted={botStarted} onLogout={handleLogout} />
         </>
       )}
     </div>
