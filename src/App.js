@@ -5,7 +5,7 @@ const API_BASE = "https://f3a9aed16b29.ngrok-free.app";
 
 // Map username → { email, password }
 const USER_CREDENTIALS = {
-  "ofodinrise": {
+  "Odin12": {
     email: "ofodinrise@gmail.com",
     password: "RiseOdin1234@"
   },
@@ -13,7 +13,7 @@ const USER_CREDENTIALS = {
     email: "tester@domain.com",
     password: "AnotherSecret456"
   },
-  "vergasovdaniel": {
+  "Verga.": {
     email: "vergasovdaniel@gmail.com",
     password: "generals2330"
   }
