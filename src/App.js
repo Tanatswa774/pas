@@ -1,12 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
-const API_BASE = "https://b14527d1e5d9.ngrok-free.app"; // Your backend API
+const API_BASE = "https://f3a9aed16b29.ngrok-free.app";
 
-const ALLOWED_USERS = {
-  "ofodinrise@gmail.com": "RiseOdin1234@",
-  "tester@domain.com": "AnotherSecret456",
-  "vergasovdaniel@gmail.com": "generals2330",
+// Map username → { email, password }
+const USER_CREDENTIALS = {
+  "ofodinrise": {
+    email: "ofodinrise@gmail.com",
+    password: "RiseOdin1234@"
+  },
+  "tester": {
+    email: "tester@domain.com",
+    password: "AnotherSecret456"
+  },
+  "vergasovdaniel": {
+    email: "vergasovdaniel@gmail.com",
+    password: "generals2330"
+  }
 };
 
 function LogsViewer({ botStarted, email, onLogout }) {
@@ -21,10 +31,13 @@ function LogsViewer({ botStarted, email, onLogout }) {
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${API_BASE}/logs?email=${encodeURIComponent(email)}`, {
+        const res = await fetch(`${API_BASE}/logs`, {
+          method: "POST",
           headers: {
+            "Content-Type": "application/json",
             "ngrok-skip-browser-warning": "true"
-          }
+          },
+          body: JSON.stringify({ email })
         });
         if (!res.ok) throw new Error(`Status ${res.status}`);
         const data = await res.json();
@@ -46,20 +59,9 @@ function LogsViewer({ botStarted, email, onLogout }) {
 
   return (
     <div style={{ marginTop: "2rem" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <h2 style={{ margin: 0 }}>Server Logs (Live)</h2>
-        <button
-          onClick={onLogout}
-          style={{
-            padding: "0.3rem 0.6rem",
-            fontSize: "0.9rem",
-            cursor: "pointer",
-            backgroundColor: "#f44336",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-          }}
-        >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h2>GAME LOGS</h2>
+        <button onClick={onLogout} style={{ backgroundColor: '#555', color: '#fff', padding: '6px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
           Logout
         </button>
       </div>
@@ -75,7 +77,6 @@ function LogsViewer({ botStarted, email, onLogout }) {
           overflowY: "scroll",
           border: "1px solid #ccc",
           padding: "0.5rem",
-          marginTop: "0.5rem",
         }}
       />
     </div>
@@ -83,24 +84,36 @@ function LogsViewer({ botStarted, email, onLogout }) {
 }
 
 function App() {
-  const [inputEmail, setInputEmail] = useState('');
+  const [inputUsername, setInputUsername] = useState('');
   const [status, setStatus] = useState('');
   const [gemStatus, setGemStatus] = useState('🔍 Waiting...');
   const [loading, setLoading] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
   const [userPassword, setUserPassword] = useState('');
   const [botStarted, setBotStarted] = useState(false);
 
   const handleLogin = () => {
-    const password = ALLOWED_USERS[inputEmail.trim()];
-    if (!password) {
-      setStatus("❌ Unauthorized email.");
+    const creds = USER_CREDENTIALS[inputUsername.trim()];
+    if (!creds) {
+      setStatus("❌ Unauthorized username.");
       return;
     }
 
     setStatus("✅ Access granted.");
     setAuthenticated(true);
-    setUserPassword(password);
+    setUserEmail(creds.email);
+    setUserPassword(creds.password);
+  };
+
+  const handleLogout = () => {
+    setAuthenticated(false);
+    setInputUsername('');
+    setUserEmail('');
+    setUserPassword('');
+    setStatus('');
+    setBotStarted(false);
+    setGemStatus('🔍 Waiting...');
   };
 
   const handleStart = async () => {
@@ -114,7 +127,7 @@ function App() {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true'
         },
-        body: JSON.stringify({ email: inputEmail.trim(), password: userPassword })
+        body: JSON.stringify({ email: userEmail, password: userPassword })
       });
 
       const result = await response.json();
@@ -140,8 +153,10 @@ function App() {
       const response = await fetch(`${API_BASE}/stop`, {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true'
-        }
+        },
+        body: JSON.stringify({ email: userEmail })
       });
 
       const result = await response.json();
@@ -162,24 +177,18 @@ function App() {
     }
   };
 
-  const handleLogout = () => {
-    setAuthenticated(false);
-    setInputEmail('');
-    setUserPassword('');
-    setBotStarted(false);
-    setStatus('');
-    setGemStatus('🔍 Waiting...');
-  };
-
   useEffect(() => {
     if (!authenticated) return;
 
     const interval = setInterval(async () => {
       try {
-        const response = await fetch(`${API_BASE}/status?email=${encodeURIComponent(inputEmail.trim())}`, {
+        const response = await fetch(`${API_BASE}/status`, {
+          method: 'POST',
           headers: {
+            'Content-Type': 'application/json',
             'ngrok-skip-browser-warning': 'true'
-          }
+          },
+          body: JSON.stringify({ email: userEmail })
         });
         const result = await response.json();
         setGemStatus(result.gem_found ? "💎 Gem found!" : "🔍 No gem yet.");
@@ -189,57 +198,49 @@ function App() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [authenticated, inputEmail]);
+  }, [authenticated, userEmail]);
 
   return (
-    <>
-      <div className="background-logo"></div>
+    <div className="App">
+      <h1>Gem Collector Bot</h1>
 
-      <div className="App">
-        <h1>Gem Collector Bot</h1>
+      {!authenticated ? (
+        <>
+          <input
+            type="text"
+            placeholder="Enter your username"
+            value={inputUsername}
+            onChange={e => setInputUsername(e.target.value)}
+            disabled={loading}
+          />
+          <br /><br />
+          <button type="button" onClick={handleLogin} disabled={loading}>
+            {loading ? "Checking..." : "Login"}
+          </button>
+          <p>{status}</p>
+        </>
+      ) : (
+        <>
+          <button type="button" onClick={handleStart} disabled={loading}>
+            {loading ? "Starting..." : "Start Bot"}
+          </button>
+          <br /><br />
+          <button
+            type="button"
+            onClick={handleStop}
+            style={{ backgroundColor: '#f44336', color: 'white' }}
+            disabled={loading}
+          >
+            {loading ? "Stopping..." : "Stop Bot"}
+          </button>
 
-        {!authenticated ? (
-          <>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={inputEmail}
-              onChange={e => setInputEmail(e.target.value)}
-              disabled={loading}
-            />
-            <br /><br />
-            <button type="button" onClick={handleLogin} disabled={loading}>
-              {loading ? "Checking..." : "Login"}
-            </button>
-            <p>{status}</p>
-          </>
-        ) : (
-          <>
-            <button type="button" onClick={handleStart} disabled={loading}>
-              {loading ? "Starting..." : "Start Bot"}
-            </button>
-            <br /><br />
-            <button
-              type="button"
-              onClick={handleStop}
-              style={{ backgroundColor: '#f44336', color: 'white' }}
-              disabled={loading}
-            >
-              {loading ? "Stopping..." : "Stop Bot"}
-            </button>
+          <p>{status}</p>
+          <p><strong>Gem Status:</strong> {gemStatus}</p>
 
-            <p>{status}</p>
-            <p><strong>Gem Status:</strong> {gemStatus}</p>
-
-            <LogsViewer
-              botStarted={botStarted}
-              email={inputEmail.trim()}
-              onLogout={handleLogout}
-            />
-          </>
-        )}
-      </div>
-    </>
+          <LogsViewer botStarted={botStarted} email={userEmail} onLogout={handleLogout} />
+        </>
+      )}
+    </div>
   );
 }
 
