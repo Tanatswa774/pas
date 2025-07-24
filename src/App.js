@@ -16,7 +16,7 @@ const USER_CREDENTIALS = {
   "Verga.": {
     email: "vergasovdaniel@gmail.com",
     password: "generals2330"
-  }
+  },
   "Keep1": {
     email: "mgynexthago@gmail.com ",
     password: "maormoyal12"
