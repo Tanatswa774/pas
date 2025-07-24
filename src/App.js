@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
-const API_BASE = "https://f3a9aed16b29.ngrok-free.app";
+const API_BASE = "https://40f41e172264.ngrok-free.app";
 
 // Map username → { email, password }
 const USER_CREDENTIALS = {
