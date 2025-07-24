@@ -9,9 +9,9 @@ const USER_CREDENTIALS = {
     email: "ofodinrise@gmail.com",
     password: "RiseOdin1234@"
   },
-  "tester": {
-    email: "tester@domain.com",
-    password: "AnotherSecret456"
+  "Keep": {
+    email: "fjbrok1992@gmail.com",
+    password: "maormoyal12"
   },
   "Verga.": {
     email: "vergasovdaniel@gmail.com",
