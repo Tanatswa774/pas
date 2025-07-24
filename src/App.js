@@ -20,6 +20,8 @@ const USER_CREDENTIALS = {
   "Keep1": {
     email: "mgynexthago@gmail.com ",
     password: "maormoyal12"
+  }
+
 };
 
 function LogsViewer({ botStarted, email, onLogout }) {
