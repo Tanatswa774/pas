@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
+import bestImage from './best.png'; // Make sure this image exists in the src folder
 
 const API_BASE = "https://d5f9b1c94829.ngrok-free.app";
 
@@ -29,6 +30,7 @@ const USER_CREDENTIALS = {
 
 function LogsViewer({ botStarted, email, onLogout }) {
   const [logs, setLogs] = useState("Bot is not running. Press Start Bot to start it.");
+  const [showBest, setShowBest] = useState(false);
   const logsRef = useRef(null);
 
   useEffect(() => {
@@ -69,10 +71,31 @@ function LogsViewer({ botStarted, email, onLogout }) {
     <div style={{ marginTop: "2rem" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h2>GAME LOGS</h2>
-        <button onClick={onLogout} style={{ backgroundColor: '#555', color: '#fff', padding: '6px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-          Logout
-        </button>
+        <div>
+          <button onClick={() => setShowBest(true)} style={{ marginRight: '10px', backgroundColor: '#007BFF', color: '#fff', padding: '6px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+            Best Practice
+          </button>
+          <button onClick={onLogout} style={{ backgroundColor: '#555', color: '#fff', padding: '6px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+            Logout
+          </button>
+        </div>
       </div>
+
+      {showBest && (
+        <div style={{ backgroundColor: '#f9f9f9', padding: '1rem', marginTop: '1rem', border: '1px solid #ccc', borderRadius: '8px' }}>
+          <h3>Best Practice:</h3>
+          <p>Configure the Blue Presets</p>
+          <p>Set your commanders for the blue presets to gather gems.<br />
+          The number of presets must match the number of marches you are able to deploy.</p>
+          <p>An example is shown in the image below:</p>
+          <img src={bestImage} alt="Best Practice Example" style={{ maxWidth: '100%', margin: '1rem 0' }} />
+          <p><strong>Note:</strong> T1 Cavalry units are the fastest moving troops.</p>
+          <button onClick={() => setShowBest(false)} style={{ marginTop: '1rem', backgroundColor: '#888', color: '#fff', padding: '6px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+            Close
+          </button>
+        </div>
+      )}
+
       <textarea
         ref={logsRef}
         value={logs}
@@ -85,6 +108,7 @@ function LogsViewer({ botStarted, email, onLogout }) {
           overflowY: "scroll",
           border: "1px solid #ccc",
           padding: "0.5rem",
+          marginTop: '1rem'
         }}
       />
     </div>
