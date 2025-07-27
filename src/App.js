@@ -72,27 +72,80 @@ function LogsViewer({ botStarted, email, onLogout }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h2>GAME LOGS</h2>
         <div>
-          <button onClick={() => setShowBest(true)} style={{ marginRight: '10px', backgroundColor: '#007BFF', color: '#fff', padding: '6px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+          <button
+            onClick={() => setShowBest(true)}
+            style={{
+              marginRight: '10px',
+              backgroundColor: '#007BFF',
+              color: '#fff',
+              padding: '6px 12px',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
             Best Practice
           </button>
-          <button onClick={onLogout} style={{ backgroundColor: '#555', color: '#fff', padding: '6px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+          <button
+            onClick={onLogout}
+            style={{
+              backgroundColor: '#555',
+              color: '#fff',
+              padding: '6px 12px',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
             Logout
           </button>
         </div>
       </div>
 
       {showBest && (
-        <div style={{ backgroundColor: '#f9f9f9', padding: '1rem', marginTop: '1rem', border: '1px solid #ccc', borderRadius: '8px' }}>
-          <h3>Best Practice:</h3>
-          <p>Configure the Blue Presets</p>
-          <p>Set your commanders for the blue presets to gather gems.<br />
-          The number of presets must match the number of marches you are able to deploy.</p>
-          <p>An example is shown in the image below:</p>
-          <img src={bestImage} alt="Best Practice Example" style={{ maxWidth: '100%', margin: '1rem 0' }} />
-          <p><strong>Note:</strong> T1 Cavalry units are the fastest moving troops.</p>
-          <button onClick={() => setShowBest(false)} style={{ marginTop: '1rem', backgroundColor: '#888', color: '#fff', padding: '6px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-            Close
-          </button>
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, width: '100%', height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 9999
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            padding: '2rem',
+            borderRadius: '10px',
+            maxWidth: '600px',
+            width: '90%',
+            maxHeight: '80%',
+            overflowY: 'auto',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
+          }}>
+            <h3>Best Practice:</h3>
+            <p>Configure the Blue Presets</p>
+            <p>
+              Set your commanders for the blue presets to gather gems.<br />
+              The number of presets must match the number of marches you are able to deploy.
+            </p>
+            <p>An example is shown in the image below:</p>
+            <img src={bestImage} alt="Best Practice Example" style={{ maxWidth: '100%', margin: '1rem 0' }} />
+            <p><strong>Note:</strong> T1 Cavalry units are the fastest moving troops.</p>
+            <button
+              onClick={() => setShowBest(false)}
+              style={{
+                marginTop: '1rem',
+                backgroundColor: '#888',
+                color: '#fff',
+                padding: '6px 12px',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
 
