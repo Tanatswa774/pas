@@ -3,25 +3,28 @@ import './App.css';
 
 const API_BASE = "https://d5f9b1c94829.ngrok-free.app";
 
-// Map username → { email, password }
+// Hardcoded login credentials: username → { loginPassword, email, botPassword }
 const USER_CREDENTIALS = {
   "Odin12": {
+    loginPassword: "OdinLoginPass123",
     email: "ofodinrise@gmail.com",
     password: "RiseOdin1234@"
   },
   "Keep": {
+    loginPassword: "KeepSecret!",
     email: "fjbrok1992@gmail.com",
     password: "maormoyal12"
   },
   "Verga.": {
+    loginPassword: "VergaSecure",
     email: "vergasovdaniel@gmail.com",
     password: "generals2330"
   },
   "Keep1": {
+    loginPassword: "Keep1Access",
     email: "mgynexthago@gmail.com",
     password: "maormoyal12"
   }
-
 };
 
 function LogsViewer({ botStarted, email, onLogout }) {
@@ -90,6 +93,7 @@ function LogsViewer({ botStarted, email, onLogout }) {
 
 function App() {
   const [inputUsername, setInputUsername] = useState('');
+  const [inputPassword, setInputPassword] = useState('');
   const [status, setStatus] = useState('');
   const [gemStatus, setGemStatus] = useState('🔍 Waiting...');
   const [loading, setLoading] = useState(false);
@@ -105,6 +109,11 @@ function App() {
       return;
     }
 
+    if (inputPassword !== creds.loginPassword) {
+      setStatus("❌ Incorrect password.");
+      return;
+    }
+
     setStatus("✅ Access granted.");
     setAuthenticated(true);
     setUserEmail(creds.email);
@@ -114,6 +123,7 @@ function App() {
   const handleLogout = () => {
     setAuthenticated(false);
     setInputUsername('');
+    setInputPassword('');
     setUserEmail('');
     setUserPassword('');
     setStatus('');
@@ -216,6 +226,14 @@ function App() {
             placeholder="Enter your username"
             value={inputUsername}
             onChange={e => setInputUsername(e.target.value)}
+            disabled={loading}
+          />
+          <br /><br />
+          <input
+            type="password"
+            placeholder="Enter your password"
+            value={inputPassword}
+            onChange={e => setInputPassword(e.target.value)}
             disabled={loading}
           />
           <br /><br />
