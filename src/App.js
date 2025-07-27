@@ -114,6 +114,7 @@ function LogsViewer({ botStarted, email, onLogout }) {
         }}>
           <div style={{
             backgroundColor: '#fff',
+            color: '#000',  // <-- This ensures text is visible
             padding: '2rem',
             borderRadius: '10px',
             maxWidth: '600px',
