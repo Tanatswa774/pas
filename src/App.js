@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import bestImage from './best.png'; // Make sure this image exists in the src folder
 
-const API_BASE = "https://d5f9b1c94829.ngrok-free.app";
+const API_BASE = "https://cc1a9d910e47.ngrok-free.app";
 
 // Hardcoded login credentials: username → { loginPassword, email, botPassword }
 const USER_CREDENTIALS = {
