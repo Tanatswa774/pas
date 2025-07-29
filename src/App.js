@@ -6,8 +6,8 @@ const API_BASE = "https://cc1a9d910e47.ngrok-free.app";
 
 // Hardcoded login credentials: username → { loginPassword, email, botPassword }
 const USER_CREDENTIALS = {
-  "Odin12": {
-    loginPassword: "OdinLoginPass123",
+  "Keep12": {
+    loginPassword: "maormoyal12",
     email: "ofodinrise@gmail.com",
     password: "RiseOdin1234@"
   },
