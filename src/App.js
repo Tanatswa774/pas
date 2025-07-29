@@ -178,7 +178,7 @@ function App() {
   const [userEmail, setUserEmail] = useState('');
   const [userPassword, setUserPassword] = useState('');
   const [botStarted, setBotStarted] = useState(false);
-  const [screenshotUrl, setScreenshotUrl] = useState('');
+  const [screenshotBlobUrl, setScreenshotBlobUrl] = useState('');
 
   const handleLogin = () => {
     const creds = USER_CREDENTIALS[inputUsername.trim()];
@@ -207,6 +207,10 @@ function App() {
     setStatus('');
     setBotStarted(false);
     setGemStatus('🔍 Waiting...');
+    if (screenshotBlobUrl) {
+      URL.revokeObjectURL(screenshotBlobUrl);
+      setScreenshotBlobUrl('');
+    }
   };
 
   const handleStart = async () => {
@@ -296,9 +300,22 @@ function App() {
   useEffect(() => {
     if (!authenticated || !botStarted) return;
 
-    const interval = setInterval(() => {
-      const timestamp = Date.now();
-      setScreenshotUrl(`${API_BASE}/screenshot?email=${encodeURIComponent(userEmail)}&t=${timestamp}`);
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(`${API_BASE}/screenshot?email=${encodeURIComponent(userEmail)}`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        });
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        setScreenshotBlobUrl(prevUrl => {
+          if (prevUrl) URL.revokeObjectURL(prevUrl);
+          return objectUrl;
+        });
+      } catch (err) {
+        console.error("Screenshot fetch error:", err);
+      }
     }, 3000);
 
     return () => clearInterval(interval);
@@ -335,9 +352,9 @@ function App() {
         <>
           <div style={{ display: 'flex', alignItems: 'flex-start', marginTop: '20px' }}>
             <div style={{ flex: 1 }}>
-              {screenshotUrl && (
+              {screenshotBlobUrl && (
                 <img
-                  src={screenshotUrl}
+                  src={screenshotBlobUrl}
                   alt="Live Screenshot"
                   style={{ width: '100%', maxWidth: '600px', border: '1px solid #ccc' }}
                 />
