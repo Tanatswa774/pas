@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
-import bestImage from './best.png'; // Make sure this image exists in the src folder
+import bestImage from './best.png';
 
 const API_BASE = "https://5012292716a4.ngrok-free.app";
 
-// Hardcoded login credentials: username → { loginPassword, email, botPassword }
 const USER_CREDENTIALS = {
   "Keep12": {
     loginPassword: "maormoyal12",
@@ -114,7 +113,7 @@ function LogsViewer({ botStarted, email, onLogout }) {
         }}>
           <div style={{
             backgroundColor: '#fff',
-            color: '#000',  // <-- This ensures text is visible
+            color: '#000',
             padding: '2rem',
             borderRadius: '10px',
             maxWidth: '600px',
@@ -179,6 +178,7 @@ function App() {
   const [userEmail, setUserEmail] = useState('');
   const [userPassword, setUserPassword] = useState('');
   const [botStarted, setBotStarted] = useState(false);
+  const [screenshotUrl, setScreenshotUrl] = useState('');
 
   const handleLogin = () => {
     const creds = USER_CREDENTIALS[inputUsername.trim()];
@@ -271,7 +271,7 @@ function App() {
   };
 
   useEffect(() => {
-    if (!authenticated) return;
+    if (!authenticated || !botStarted) return;
 
     const interval = setInterval(async () => {
       try {
@@ -291,7 +291,18 @@ function App() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [authenticated, userEmail]);
+  }, [authenticated, botStarted, userEmail]);
+
+  useEffect(() => {
+    if (!authenticated || !botStarted) return;
+
+    const interval = setInterval(() => {
+      const timestamp = Date.now();
+      setScreenshotUrl(`${API_BASE}/screenshot?email=${encodeURIComponent(userEmail)}&t=${timestamp}`);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [authenticated, botStarted, userEmail]);
 
   return (
     <div className="App">
@@ -322,21 +333,33 @@ function App() {
         </>
       ) : (
         <>
-          <button type="button" onClick={handleStart} disabled={loading}>
-            {loading ? "Starting..." : "Start Bot"}
-          </button>
-          <br /><br />
-          <button
-            type="button"
-            onClick={handleStop}
-            style={{ backgroundColor: '#f44336', color: 'white' }}
-            disabled={loading}
-          >
-            {loading ? "Stopping..." : "Stop Bot"}
-          </button>
-
-          <p>{status}</p>
-          <p><strong>Gem Status:</strong> {gemStatus}</p>
+          <div style={{ display: 'flex', alignItems: 'flex-start', marginTop: '20px' }}>
+            <div style={{ flex: 1 }}>
+              {screenshotUrl && (
+                <img
+                  src={screenshotUrl}
+                  alt="Live Screenshot"
+                  style={{ width: '100%', maxWidth: '600px', border: '1px solid #ccc' }}
+                />
+              )}
+            </div>
+            <div style={{ marginLeft: '20px' }}>
+              <button type="button" onClick={handleStart} disabled={loading}>
+                {loading ? "Starting..." : "Start Bot"}
+              </button>
+              <br /><br />
+              <button
+                type="button"
+                onClick={handleStop}
+                style={{ backgroundColor: '#f44336', color: 'white' }}
+                disabled={loading}
+              >
+                {loading ? "Stopping..." : "Stop Bot"}
+              </button>
+              <p>{status}</p>
+              <p><strong>Gem Status:</strong> {gemStatus}</p>
+            </div>
+          </div>
 
           <LogsViewer botStarted={botStarted} email={userEmail} onLogout={handleLogout} />
         </>
